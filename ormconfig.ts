@@ -10,10 +10,10 @@ export = {
   database: env.DB_BASE,
   synchronize: false,
   logging: true,
-  entities: ['src/components/user/models/*.ts', 'src/components/post/models/*.ts'],
+  entities: ['src/db/models/*.ts'],
   migrations: ['src/db/migration/*.ts'],
   cli: {
-    entitiesDir: 'src/components/user/models',
+    entitiesDir: 'src/db/models',
     migrationsDir: 'src/db/migration',
   },
 };

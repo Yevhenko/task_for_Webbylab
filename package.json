@@ -4,7 +4,14 @@
   "description": "test task",
   "main": "src/index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "nodemon src/index.ts",
+    "docker:up": "docker-compose up",
+    "docker:down": "docker-compose down",
+    "local:dev:typeorm": "npm run typeorm:dev",
+    "typeorm:dev": "ts-node ./node_modules/.bin/typeorm --config ormconfig.ts",
+    "typeorm": "ts-node ./node_modules/.bin/typeorm",
+    "migration:generate": "npm run typeorm -- migration:generate --config ormconfig.ts --connection  --name ",
+    "migration:run": "npm run typeorm -- migration:run"
   },
   "repository": {
     "type": "git",
@@ -17,8 +24,10 @@
   },
   "homepage": "https://github.com/Yevhenko/task_for_Webbylab#readme",
   "dependencies": {
+    "@types/node": "^16.11.7",
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
+    "nodemon": "^2.0.15",
     "pg": "^8.6.0",
     "reflect-metadata": "^0.1.13",
     "ts-dotenv": "^0.8.3",
