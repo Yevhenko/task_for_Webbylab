@@ -24,7 +24,6 @@
   },
   "homepage": "https://github.com/Yevhenko/task_for_Webbylab#readme",
   "dependencies": {
-    "@types/node": "^16.11.7",
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
     "nodemon": "^2.0.15",
@@ -34,6 +33,7 @@
     "typeorm": "^0.2.32"
   },
   "devDependencies": {
+    "@types/node": "^16.11.7",
     "@types/express": "^4.17.11",
     "@typescript-eslint/eslint-plugin": "^4.23.0",
     "@typescript-eslint/parser": "^4.23.0",
