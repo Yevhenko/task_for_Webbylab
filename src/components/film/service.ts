@@ -2,18 +2,18 @@ import { getRepository } from 'typeorm';
 import fs from 'fs';
 import path from 'path';
 import { promisify } from 'util';
-import { Actor } from '@components/film/interfaces';
+import { Actor, IFilm } from '@components/film/interfaces';
 import { Film } from '../../db/models/Film';
 
-export const createFilm = async (data: Film): Promise<Film> => {
+export const createFilm = async (data: IFilm): Promise<IFilm> => {
   const film = getRepository(Film).create(data);
   return await getRepository(Film).save(film);
 };
 
-export const getOneFilmById = async (filmId: number): Promise<Film | null> => {
+export const getOneFilmById = async (filmId: number): Promise<IFilm | null> => {
   const film = await getRepository(Film).findOne({
     where: {
-      filmId,
+      id: filmId,
     },
   });
 
@@ -22,10 +22,10 @@ export const getOneFilmById = async (filmId: number): Promise<Film | null> => {
   return film;
 };
 
-export const getOneFilmByName = async (name: string): Promise<Film | null> => {
+export const getOneFilmByName = async (name: string): Promise<IFilm | null> => {
   const film = await getRepository(Film).findOne({
     where: {
-      name,
+      name: name,
     },
   });
 
@@ -34,20 +34,27 @@ export const getOneFilmByName = async (name: string): Promise<Film | null> => {
   return film;
 };
 
-export const getOneFilmByActor = async (actor: Actor): Promise<Film | null> => {
+export const getOneFilmByActor = async (actor: Actor): Promise<IFilm | null> => {
   const filmRepo = getRepository(Film);
   const film = await filmRepo
     .createQueryBuilder('film')
-    .where('film.listOfActors @> ARRAY[:listOfActors]', { listOfActors: actor })
+    .where(`film.listOfActors ::jsonb @> :listOfActors`, {
+      listOfActors: JSON.stringify([
+        {
+          firstName: actor.firstName,
+          lastName: actor.lastName,
+        },
+      ]),
+    })
     .getOne();
   if (!film) return null;
 
   return film;
 };
 
-export const removeFilm = async (id: number) => await getRepository(Film).delete(id);
+export const removeFilm = async (filmId: number) => await getRepository(Film).delete({ id: filmId });
 
-export const getAllFilmsInAbcOrder = async (): Promise<Film[]> =>
+export const getAllFilmsInAbcOrder = async (): Promise<IFilm[]> =>
   await getRepository(Film).find({
     order: {
       name: 'ASC',
@@ -55,7 +62,7 @@ export const getAllFilmsInAbcOrder = async (): Promise<Film[]> =>
   });
 
 export const importFile = async () => {
-  const filePath = path.join(process.cwd(), 'uploads/sample_movies.txt');
+  const filePath = path.join(process.cwd(), 'src/uploads/sample_movies.txt');
   const promisifiedReadFile = promisify(fs.readFile);
-  return await promisifiedReadFile(filePath);
+  return await promisifiedReadFile(filePath, { encoding: 'utf8', flag: 'r' });
 };
