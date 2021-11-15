@@ -1,4 +1,3 @@
-import { Column } from 'typeorm';
 import { FilmFormat } from '@constants/index';
 
 export interface Actor {
@@ -8,6 +7,7 @@ export interface Actor {
 
 export interface IFilm {
   name: string;
+  productionYear: Date;
   formatOfMovie: FilmFormat;
-  listOfActors: Actor[];
+  listOfActors: Array<Actor>;
 }

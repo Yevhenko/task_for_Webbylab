@@ -16,8 +16,8 @@ export class Film {
   @Column({ type: 'enum', enum: FilmFormat })
   formatOfMovie!: FilmFormat;
 
-  @Column({ type: 'jsonb', array: true })
-  listOfActors!: Actor[];
+  @Column({ type: 'jsonb', array: false })
+  listOfActors!: Array<Actor>;
 
   @CreateDateColumn()
   createdAt!: Date;
