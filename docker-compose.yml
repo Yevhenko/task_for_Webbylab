@@ -1,0 +1,32 @@
+version: '3'
+services:
+  films:
+    container_name: films
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: sh -c "npm run typeorm:dev migration:run && npm run start"
+    env_file:
+      - .env
+    ports:
+      - ${APP_PORT}:${APP_PORT}
+    volumes:
+      - ./src:/usr/src/app/src
+    depends_on:
+      - postgres
+    links:
+      - postgres
+    restart: always
+
+  postgres:
+    container_name: postgres
+    image: "postgres:9.6.1"
+    ports:
+      - ${DB_PORT_EXT}:${DB_PORT}
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PSWD}
+      POSTGRES_DB: ${DB_BASE}
+    volumes:
+      - ./data_volumes/postgres:/var/lib/postgresql/data
+    restart: always
