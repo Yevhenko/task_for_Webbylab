@@ -6,8 +6,9 @@ export interface Actor {
 }
 
 export interface IFilm {
-  name: string;
-  productionYear: Date;
+  id?: number;
+  title: string;
+  year: number;
   formatOfMovie: FilmFormat;
   listOfActors: Array<Actor>;
 }

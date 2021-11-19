@@ -10,3 +10,4 @@ film.get('/films', filmController.getAllFilms);
 film.get('/film', filmController.importFilmData);
 film.post('/film', filmController.addNewFilm);
 film.post('/filmByActor', filmController.getFilmByActor);
+film.patch('/film', filmController.updateFilm);
