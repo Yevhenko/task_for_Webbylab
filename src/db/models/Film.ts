@@ -8,10 +8,10 @@ export class Film {
   id!: number;
 
   @Column({ length: 100 })
-  name!: string;
+  title!: string;
 
   @Column()
-  productionYear!: Date;
+  year!: number;
 
   @Column({ type: 'enum', enum: FilmFormat })
   formatOfMovie!: FilmFormat;
