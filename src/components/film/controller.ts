@@ -1,20 +1,34 @@
 import { Request, Response } from 'express';
 import * as filmService from './service';
+import { Actor } from '@components/film/interfaces';
 
 export const addNewFilm = async (req: Request, res: Response) => {
   const {
-    body: { name, productionYear, formatOfMovie, listOfActors },
+    body: { title, year, format: formatOfMovie, actors: listOfActors },
   } = req;
 
-  if (!name || !productionYear || !formatOfMovie || !listOfActors) return res.sendStatus(400);
+  if (!title || !year || !formatOfMovie || !listOfActors) return res.sendStatus(400);
 
-  const newFilm = await filmService.createFilm({ name, productionYear, formatOfMovie, listOfActors });
+  const oldFilm = await filmService.getOneFilmByName(title);
+
+  if (oldFilm)
+    return res.json({
+      status: 0,
+      error: {
+        fields: {
+          title: 'NOT_UNIQUE',
+        },
+        code: 'MOVIE_EXISTS',
+      },
+    });
+
+  const newFilm = await filmService.createFilm({ title, year, formatOfMovie, listOfActors });
 
   !newFilm
     ? res.sendStatus(501)
     : res.status(200).json({
-        name: newFilm.name,
-        productionYear: newFilm.productionYear,
+        title: newFilm.title,
+        year: newFilm.year,
         formatOfMovie: newFilm.formatOfMovie,
         listOfActors: newFilm.listOfActors,
       });
@@ -28,12 +42,21 @@ export const getFilmById = async (req: Request, res: Response) => {
   const film = await filmService.getOneFilmById(+params.filmId);
 
   !film
-    ? res.sendStatus(404)
+    ? res.status(404).json({
+        status: 0,
+        error: {
+          fields: 'id',
+          code: 'MOVIE_NOT_FOUND',
+        },
+      })
     : res.status(200).json({
-        name: film.name,
-        productionYear: film.productionYear,
-        formatOfMovie: film.formatOfMovie,
-        listOfActors: film.listOfActors,
+        data: {
+          title: film.title,
+          year: film.year,
+          format: film.formatOfMovie,
+          actors: film.listOfActors,
+          status: 1,
+        },
       });
 };
 
@@ -42,47 +65,92 @@ export const getFilmByName = async (req: Request, res: Response) => {
 
   if (!params.name) return res.sendStatus(400);
 
-  console.log(params);
   const film = await filmService.getOneFilmByName(params.name);
 
   !film
-    ? res.sendStatus(404)
+    ? res.status(404).json({
+        status: 0,
+        error: {
+          fields: 'title',
+          code: 'MOVIE_NOT_FOUND',
+        },
+      })
     : res.status(200).json({
-        name: film.name,
-        productionYear: film.productionYear,
-        formatOfMovie: film.formatOfMovie,
-        listOfActors: film.listOfActors,
+        data: {
+          title: film.title,
+          year: film.year,
+          format: film.formatOfMovie,
+          actors: film.listOfActors,
+          status: 1,
+        },
       });
 };
 
 export const getFilmByActor = async (req: Request, res: Response) => {
   const {
-    body: { firstName, lastName },
+    body: { actor },
   } = req;
 
-  if (!firstName || !lastName) return res.sendStatus(400);
+  if (!actor) return res.sendStatus(400);
 
-  const film = await filmService.getOneFilmByActor({ firstName, lastName });
+  const film = await filmService.getOneFilmByActor(actor);
 
   !film
-    ? res.sendStatus(404)
+    ? res.status(404).json({
+        status: 0,
+        error: {
+          fields: 'actor',
+          code: 'MOVIE_NOT_FOUND',
+        },
+      })
     : res.status(200).json({
-        name: film.name,
-        productionYear: film.productionYear,
-        formatOfMovie: film.formatOfMovie,
-        listOfActors: film.listOfActors,
+        data: {
+          title: film.title,
+          year: film.year,
+          format: film.formatOfMovie,
+          actors: film.listOfActors,
+          status: 1,
+        },
       });
 };
 
+export const updateFilm = async (req: Request, res: Response) => {
+  const { body, params } = req;
+
+  const film = await filmService.getOneFilmById(+params.filmId);
+
+  if (!film)
+    return res.json({
+      status: 0,
+      error: {
+        fields: 'id',
+        code: 'MOVIE_NOT_FOUND',
+      },
+    });
+
+  const resp = await filmService.updateMovie(+params.filmId, body);
+
+  res.json({ data: resp, status: 1 });
+};
+
 export const getAllFilms = async (req: Request, res: Response) => {
-  const films = await filmService.getAllFilmsInAbcOrder();
+  const {
+    query: { offset, limit, order, sort },
+  } = req;
+
+  if (!offset || !limit || !order || !sort)
+    return res.status(400).json({ message: 'specify offset, limit. sort and order' });
+
+  //@ts-expect-error: order is literal type here
+  const films = await filmService.getAllFilmsInAbcOrder(+offset, +limit, order, sort);
 
   !films
     ? res.sendStatus(404)
     : res.status(200).json(
         films.map((film) => ({
-          name: film.name,
-          productionYear: film.productionYear,
+          id: film.id,
+          title: film.title,
+          year: film.year,
           formatOfMovie: film.formatOfMovie,
           listOfActors: film.listOfActors,
         })),
@@ -92,13 +160,26 @@ export const getAllFilms = async (req: Request, res: Response) => {
 export const deleteFilm = async (req: Request, res: Response) => {
   const { params } = req;
 
-  !params.filmId ? res.sendStatus(400) : await filmService.removeFilm(+params.filmId);
+  const film = await filmService.getOneFilmById(+params.filmId);
 
-  res.sendStatus(200);
+  if (!film)
+    return res.json({
+      status: 0,
+      error: {
+        fields: 'id',
+        code: 'MOVIE_NOT_FOUND',
+      },
+    });
+
+  await filmService.removeFilm(+params.filmId);
+
+  res.json({
+    status: 1,
+  });
 };
 
 export const importFilmData = async (req: Request, res: Response) => {
   const data = await filmService.importFile();
 
-  !data ? res.sendStatus(400) : res.status(200).json(data);
+  !data ? res.sendStatus(400) : res.status(200).json({ data });
 };
