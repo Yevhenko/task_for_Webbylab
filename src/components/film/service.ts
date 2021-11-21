@@ -42,7 +42,7 @@ export const updateMovie = async (filmId: number, data: IFilm): Promise<IFilm | 
 export const getOneFilmByName = async (name: string): Promise<IFilm | null> => {
   const film = await getRepository(Film).findOne({
     where: {
-      name: name,
+      title: name,
     },
   });
 
@@ -51,17 +51,12 @@ export const getOneFilmByName = async (name: string): Promise<IFilm | null> => {
   return film;
 };
 
-export const getOneFilmByActor = async (actor: Actor): Promise<IFilm | null> => {
+export const getOneFilmByActor = async (actor: string): Promise<IFilm | null> => {
   const filmRepo = getRepository(Film);
   const film = await filmRepo
     .createQueryBuilder('film')
     .where(`film.listOfActors ::jsonb @> :listOfActors`, {
-      listOfActors: JSON.stringify([
-        {
-          firstName: actor.firstName,
-          lastName: actor.lastName,
-        },
-      ]),
+      listOfActors: JSON.stringify([actor]),
     })
     .getOne();
   if (!film) return null;

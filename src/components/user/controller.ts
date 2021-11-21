@@ -26,5 +26,5 @@ export const createUser = async (req: Request, res: Response) => {
   await userService.buildUser({ name, email, password, confirmPassword });
 
   const token = jwt.sign({ password }, accessSecret, { expiresIn: 36000 });
-  res.status(200).json({ token, status: 1 });
+  return res.status(200).json({ token, status: 1 });
 };

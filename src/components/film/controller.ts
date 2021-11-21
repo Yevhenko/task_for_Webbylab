@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
 import * as filmService from './service';
+import { Actor } from '@components/film/interfaces';
 
 export const addNewFilm = async (req: Request, res: Response) => {
   const {
-    body: { title, year, formatOfMovie, listOfActors },
+    body: { title, year, format: formatOfMovie, actors: listOfActors },
   } = req;
 
   if (!title || !year || !formatOfMovie || !listOfActors) return res.sendStatus(400);
@@ -21,7 +22,7 @@ export const addNewFilm = async (req: Request, res: Response) => {
       },
     });
 
-  const newFilm = await filmService.createFilm({ title, year: year, formatOfMovie, listOfActors });
+  const newFilm = await filmService.createFilm({ title, year, formatOfMovie, listOfActors });
 
   !newFilm
     ? res.sendStatus(501)
@@ -62,9 +63,9 @@ export const getFilmById = async (req: Request, res: Response) => {
 export const getFilmByName = async (req: Request, res: Response) => {
   const { params } = req;
 
-  if (!params.title) return res.sendStatus(400);
+  if (!params.name) return res.sendStatus(400);
 
-  const film = await filmService.getOneFilmByName(params.title);
+  const film = await filmService.getOneFilmByName(params.name);
 
   !film
     ? res.status(404).json({
@@ -87,12 +88,12 @@ export const getFilmByName = async (req: Request, res: Response) => {
 
 export const getFilmByActor = async (req: Request, res: Response) => {
   const {
-    body: { firstName, lastName },
+    body: { actor },
   } = req;
 
-  if (!firstName || !lastName) return res.sendStatus(400);
+  if (!actor) return res.sendStatus(400);
 
-  const film = await filmService.getOneFilmByActor({ firstName, lastName });
+  const film = await filmService.getOneFilmByActor(actor);
 
   !film
     ? res.status(404).json({
