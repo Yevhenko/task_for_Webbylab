@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import * as filmService from './service';
-import { Actor } from '@components/film/interfaces';
+import { importFile } from './service';
 
 export const addNewFilm = async (req: Request, res: Response) => {
   const {
@@ -179,7 +179,6 @@ export const deleteFilm = async (req: Request, res: Response) => {
 };
 
 export const importFilmData = async (req: Request, res: Response) => {
-  const data = await filmService.importFile();
-
-  !data ? res.sendStatus(400) : res.status(200).json({ data });
+  const data = await importFile(`${req.file!.path}`);
+  res.status(200).json({ data });
 };

@@ -2,7 +2,7 @@ import { getRepository } from 'typeorm';
 import fs from 'fs';
 import path from 'path';
 import { promisify } from 'util';
-import { Actor, IFilm } from '@components/film/interfaces';
+import { IFilm } from '@components/film/interfaces';
 import { Film } from '../../db/models/Film';
 
 export const createFilm = async (data: IFilm): Promise<IFilm> => {
@@ -82,8 +82,16 @@ export const getAllFilmsInAbcOrder = async (
     .getMany();
 };
 
-export const importFile = async () => {
-  const filePath = path.join(process.cwd(), 'src/uploads/sample_movies.txt');
+export const importFile = async (filePath: string) => {
   const promisifiedReadFile = promisify(fs.readFile);
-  return await promisifiedReadFile(filePath, { encoding: 'utf8', flag: 'r' });
+  const data = await promisifiedReadFile(filePath, { encoding: 'utf8', flag: 'r' });
+
+  const people = data.split(/\r?\n/).filter((e) => e.length > 4);
+
+  const result = [];
+  for (let i = 0; i < people.length; i += 2) {
+    result.push([people[i], people[i + 1], people[i + 2], people[i + 3]]);
+  }
+
+  return result;
 };
